@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>驗證成功</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;      /* 垂直置中 */
+      justify-content: center;  /* 水平置中 */
+      background-image: url(/image/bg2.JPG);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+      padding: 16px;
+    }
+
+    .success-wrapper {
+      text-align: center;
+      padding: 16px;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      max-width: 480px;
+      width: 100%;
+      backdrop-filter: blur(3px);
+    }
+
+    .success-text {
+      font-size: 25px;
+      margin-bottom: 10px;
+      color: #292929;
+      font-weight: 500;
+    }
+
+    .success-highlight {
+      font-weight: 700;
+      color: #ff0000;
+    }
+
+    /* 卡片區：包含標題 + 圖片 */
+    .adopt-card {
+      margin: 14px auto 18px;
+      padding: 14px 14px 16px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    }
+
+    .adopt-title {
+      font-size: 25px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #333333;
+    }
+
+    .success-image {
+      max-width: 100%;
+      border-radius: 8px;
+      display: block;
+      margin: 0 auto;
+      opacity: 0;
+      transform: scale(0.96);
+      animation: fadeInCenter 1.8s ease-out forwards;
+    }
+
+    @keyframes fadeInCenter {
+      from {
+        opacity: 0;
+        transform: scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* 第二階段：換圖時的彈跳動畫 */
+    .success-image.pop-in {
+      animation: popIn 0.9s ease-out forwards;
+    }
+
+    @keyframes popIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.6);
+      }
+      60% {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* 領養按鈕樣式 */
+    .adopt-btn {
+      margin-top: 8px;
+      padding: 10px 26px;
+      border-radius: 24px;
+      border: none;
+      background: #34a853;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out,
+                  filter 0.1s ease-out;
+    }
+
+    .adopt-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.3);
+      filter: brightness(1.05);
+    }
+
+    .adopt-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+      filter: brightness(0.96);
+    }
+
+    .adopt-btn.disabled {
+      background: #9e9e9e;
+      cursor: default;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      filter: none;
+    }
+
+    /* 恭喜訊息 */
+    .congrats-text {
+      margin-top: 12px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #ff5722;
+      display: none;
+      opacity: 0;
+    }
+
+    .congrats-text.visible {
+      display: block;
+      animation: congratsIn 0.9s ease-out forwards;
+    }
+
+    @keyframes congratsIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .success-text {
+        font-size: 18px;
+      }
+      .adopt-title {
+        font-size: 20px;
+      }
+      .adopt-btn {
+        width: 100%;
+      }
+      .congrats-text {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="success-wrapper">
+    <div class="success-text">
+      只差最後一步，你就可以成功<span class="success-highlight">終身領養</span>此人！
+    </div>
+    <div class="success-text">
+      但你都可以先聽下佢講幾句，再決定是否領養。
+    </div>
+
+    <!-- 卡片：標題 + 圖片 -->
+    <div class="adopt-card">
+      <div class="adopt-title" id="adoptTitle">一號候選人： 彭錦樂</div>
+      <img src="/image/adopt.jpeg" alt="Adopt Target" class="success-image" id="adoptImage">
+    </div>
+
+    <!-- 按鈕 -->
+    <button class="adopt-btn" id="adoptBtn" onclick="sendAdoptEmail()">
+      領養此人
+    </button>
+
+    <!-- 恭喜訊息（按下後顯示） -->
+    <div id="congrats" class="congrats-text">
+      恭喜你！你已成功終身領養!!
+    </div>
+  </div>
+
+  <script>
+    function sendAdoptEmail() {
+      const img = document.getElementById("adoptImage");
+      const title = document.getElementById("adoptTitle");
+      const btn = document.getElementById("adoptBtn");
+      const congrats = document.getElementById("congrats");
+
+      // 1. 換成另一張圖片（請改成你的第二張圖片路徑）
+      img.src = "/image/adopt2.jpeg";
+
+      // 重新觸發圖片彈跳動畫
+      img.classList.remove("pop-in");
+      // 強制 reflow 以便重新套用動畫
+      void img.offsetWidth;
+      img.classList.add("pop-in");
+
+      // 2. 修改標題
+      title.textContent = "恭喜你已成功領養： 彭錦樂";
+
+      // 3. 更新按鈕狀態與文字
+      btn.textContent = "領養完成";
+      btn.classList.add("disabled");
+      btn.disabled = true;
+
+      // 4. 顯示恭喜訊息，帶動畫
+      congrats.classList.add("visible");
+    }
+  </script>
+</body>
+</html>

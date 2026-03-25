@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <!-- 手機版響應式必要設定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fake reCAPTCHA 4x4</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    /* 全畫面置中背景 */
+    body {
+      font-family: Arial, "Microsoft JhengHei", sans-serif;
+      background-image: url(/image/bg2.JPG);
+      background-size: cover;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px; /* 手機時避免貼邊 */
+    }
+
+    /* 外層卡片：寬度自適應，最大 430px */
+    .captcha-card {
+      width: 100%;
+      max-width: 430px;
+      background-color: #ffffff;
+      border: 1px solid #dcdcdc;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    /* 藍色標題列 */
+    .captcha-header {
+      background-color: #1a73e8;
+      color: #ffffff;
+      padding: 14px 18px;
+    }
+
+    .captcha-header small {
+      display: block;
+      font-size: 24px;
+      margin-bottom: 2px;
+      opacity: 0.9;
+    }
+
+    .captcha-header .keyword {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 2px;
+    }
+
+    /* 圖片區 */
+    .captcha-image-area {
+      padding: 8px;
+      background-color: #fafafa;
+    }
+
+    .captcha-grid {
+      width: 100%;
+      aspect-ratio: 4 / 4; /* 4x4 正方形，會隨寬度縮放 */
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      background-color: #000;
+    }
+
+    .captcha-cell {
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      background-image: url("/image/ring.png"); /* 單一張大圖 */
+      background-repeat: no-repeat;
+      background-size: 400% 400%;          /* 4x4 切割 */
+      cursor: pointer;
+      transition: box-shadow 0.08s ease-out, transform 0.08s ease-out;
+    }
+
+    .captcha-cell:hover {
+      box-shadow: inset 0 0 0 2px #1a73e8;
+      transform: scale(1.01);
+      z-index: 1;
+    }
+
+    .captcha-cell.selected {
+      box-shadow: inset 0 0 0 3px #1a73e8;
+      z-index: 1;
+    }
+
+    /* 錯誤訊息 */
+    .error {
+      color: #d93025;
+      font-size: 12px;
+      padding: 4px 12px 8px;
+      display: none;
+    }
+
+    /* 底部工具列與 確認 按鈕 */
+    .captcha-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-top: 1px solid #e0e0e0;
+      background-color: #f7f7f7;
+    }
+
+    .footer-icons {
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+      gap: 10px;
+      color: #757575;
+    }
+
+    .footer-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid #bdbdbd;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      background-color: #ffffff;
+    }
+
+    .skip-btn {
+      padding: 8px 22px;
+      background-color: #1a73e8;
+      color: #ffffff;
+      border: none;
+      border-radius: 2px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .skip-btn:hover {
+      background-color: #1967d2;
+    }
+
+    /* ========= 手機版 RWD 調整 ========= */
+
+    /* 小於 480px：字級、padding 稍微縮小 */
+    @media (max-width: 480px) {
+      .captcha-header {
+        padding: 10px 12px;
+      }
+
+      .captcha-header small {
+        font-size: 18px;
+      }
+
+      .captcha-header .keyword {
+        font-size: 30px;
+      }
+
+      .captcha-image-area {
+        padding: 6px;
+      }
+
+      .error {
+        font-size: 11px;
+        padding: 4px 10px 6px;
+      }
+
+      .captcha-footer {
+        padding: 6px 10px;
+      }
+
+      .footer-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+      }
+
+      .skip-btn {
+        padding: 7px 18px;
+        font-size: 12px;
+      }
+    }
+
+    /* 非常小的螢幕（例如 360px 以下）再縮一次 */
+    @media (max-width: 360px) {
+      .captcha-header .keyword {
+        font-size: 18px;
+      }
+
+      .captcha-header small {
+        font-size: 10px;
+      }
+
+      .skip-btn {
+        padding: 6px 14px;
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="captcha-card">
+    <!-- Header -->
+    <div class="captcha-header">
+      <small>請選取所有包含</small>
+      <div class="keyword">戒指</div>
+      <small>的圖片，然後按確認</small>
+    </div>
+
+    <!-- Image grid -->
+    <div class="captcha-image-area">
+      <div class="captcha-grid">
+        <!-- row, col: 0~3 -->
+        <!-- 第一排 -->
+        <div class="captcha-cell" data-row="0" data-col="0" onclick="toggleCell(0,0,this)"></div>
+        <div class="captcha-cell" data-row="0" data-col="1" onclick="toggleCell(0,1,this)"></div>
+        <div class="captcha-cell" data-row="0" data-col="2" onclick="toggleCell(0,2,this)"></div>
+        <div class="captcha-cell" data-row="0" data-col="3" onclick="toggleCell(0,3,this)"></div>
+        <!-- 第二排 -->
+        <div class="captcha-cell" data-row="1" data-col="0" onclick="toggleCell(1,0,this)"></div>
+        <div class="captcha-cell" data-row="1" data-col="1" onclick="toggleCell(1,1,this)"></div>
+        <div class="captcha-cell" data-row="1" data-col="2" onclick="toggleCell(1,2,this)"></div>
+        <div class="captcha-cell" data-row="1" data-col="3" onclick="toggleCell(1,3,this)"></div>
+        <!-- 第三排 -->
+        <div class="captcha-cell" data-row="2" data-col="0" onclick="toggleCell(2,0,this)"></div>
+        <div class="captcha-cell" data-row="2" data-col="1" onclick="toggleCell(2,1,this)"></div>
+        <div class="captcha-cell" data-row="2" data-col="2" onclick="toggleCell(2,2,this)"></div>
+        <div class="captcha-cell" data-row="2" data-col="3" onclick="toggleCell(2,3,this)"></div>
+        <!-- 第四排 -->
+        <div class="captcha-cell" data-row="3" data-col="0" onclick="toggleCell(3,0,this)"></div>
+        <div class="captcha-cell" data-row="3" data-col="1" onclick="toggleCell(3,1,this)"></div>
+        <div class="captcha-cell" data-row="3" data-col="2" onclick="toggleCell(3,2,this)"></div>
+        <div class="captcha-cell" data-row="3" data-col="3" onclick="toggleCell(3,3,this)"></div>
+      </div>
+    </div>
+
+    <!-- 錯誤訊息 -->
+    <div id="error" class="error">OHHHHHHHH...慘慘B...請重新選取</div>
+
+    <!-- Footer -->
+    <div class="captcha-footer">
+      <div class="footer-icons">
+        <span class="footer-icon">⟲</span>
+        <span class="footer-icon">🎧</span>
+        <span class="footer-icon">i</span>
+      </div>
+      <button class="skip-btn" type="button" onclick="verify()">確認</button>
+    </div>
+  </div>
+
+  <script>
+    // ==== 正確答案集合 (row,col) ====
+    const correctSet = new Set([
+      "2,1", "2,2",
+      "3,1", "3,2"
+    ]);
+
+    // 使用者目前選取的格子
+    const selectedSet = new Set();
+
+    function key(row, col) {
+      return row + "," + col;
+    }
+
+    // 點格子：只切換選取狀態，不驗證
+    function toggleCell(row, col, el) {
+      const k = key(row, col);
+      if (selectedSet.has(k)) {
+        selectedSet.delete(k);
+        el.classList.remove("selected");
+      } else {
+        selectedSet.add(k);
+        el.classList.add("selected");
+      }
+    }
+
+    // 點「確認」按鈕才驗證並決定是否跳轉
+    function verify() {
+      const errorEl = document.getElementById("error");
+
+      // 檢查 selectedSet 與 correctSet 是否完全相同
+      let ok = selectedSet.size === correctSet.size;
+      if (ok) {
+        for (const k of selectedSet) {
+          if (!correctSet.has(k)) {
+            ok = false;
+            break;
+          }
+        }
+      }
+
+      if (ok) {
+        errorEl.style.display = "none";
+        // 驗證通過時跳轉
+        window.location.href = "success.html";
+      } else {
+        errorEl.style.display = "block";
+      }
+    }
+
+    // 設定每格的 background-position，讓單張圖切成 4×4
+    (function setupBackgroundPositions() {
+      const cells = document.querySelectorAll(".captcha-cell");
+      cells.forEach(cell => {
+        const row = parseInt(cell.dataset.row, 10);
+        const col = parseInt(cell.dataset.col, 10);
+
+        // 4 個位置：0%、33.33%、66.66%、100%
+        const xPos = (col / 3) * 100;
+        const yPos = (row / 3) * 100;
+
+        cell.style.backgroundPosition = `${xPos}% ${yPos}%`;
+      });
+    })();
+  </script>
+</body>
+</html>
