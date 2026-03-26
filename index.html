@@ -14,7 +14,7 @@
     body {
       font-family: Arial, "Microsoft JhengHei", sans-serif;
       background-color: #f5f5f5;
-      background-image: url('./image/bg2.JPG'), white; /* 背景圖 + fallback 顏色 */
+      background-image: url('./image/bg2.JPG'), linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -220,7 +220,7 @@
     }
 
     .intro-section h1 {
-      color: #4b6381;
+      color: #1a73e8;
       font-size: 28px;
       margin: 0 0 10px 0;
       font-weight: 700;
@@ -235,7 +235,7 @@
 
     .start-btn {
       padding: 12px 32px;
-      background-color: #35557e;
+      background-color: #1a73e8;
       color: #ffffff;
       border: none;
       border-radius: 2px;
@@ -292,10 +292,9 @@
 </head>
 <body>
   <div class="intro-section">
-    <h1>Miss. Au Won Hung Crystal</h1>
-    <h1>歡迎來到終極挑戰題</h1>
-    <p>請點擊下方按鈕開始挑戰</p>
-    <button class="start-btn" onclick="startCaptcha()">開始挑戰</button>
+    <h1>歡迎來到驗證測試</h1>
+    <p>請點擊下方按鈕開始驗證流程</p>
+    <button class="start-btn" onclick="startCaptcha()">開始驗證</button>
   </div>
 
   <div class="captcha-card" id="captcha-container" style="display: none;">
