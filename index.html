@@ -216,10 +216,11 @@
       padding: 20px;
       text-align: center;
       margin-bottom: 12px;
+      transition: opacity 0.5s ease;
     }
 
     .intro-section h1 {
-      color: #1a73e8;
+      color: #4b6381;
       font-size: 28px;
       margin: 0 0 10px 0;
       font-weight: 700;
@@ -234,7 +235,7 @@
 
     .start-btn {
       padding: 12px 32px;
-      background-color: #1a73e8;
+      background-color: #35557e;
       color: #ffffff;
       border: none;
       border-radius: 2px;
@@ -291,9 +292,10 @@
 </head>
 <body>
   <div class="intro-section">
-    <h1>歡迎來到驗證測試</h1>
-    <p>請點擊下方按鈕開始驗證流程</p>
-    <button class="start-btn" onclick="startCaptcha()">開始驗證</button>
+    <h1>Miss. Au Won Hung Crystal</h1>
+    <h1>歡迎來到終極挑戰題</h1>
+    <p>請點擊下方按鈕開始挑戰</p>
+    <button class="start-btn" onclick="startCaptcha()">開始挑戰</button>
   </div>
 
   <div class="captcha-card" id="captcha-container" style="display: none;">
@@ -415,8 +417,17 @@
       const introSection = document.querySelector(".intro-section");
       const captchaContainer = document.getElementById("captcha-container");
       
+      // 隱藏介紹區塊
       introSection.style.display = "none";
+      
+      // 顯示 captcha 區塊並設置初始透明度
       captchaContainer.style.display = "block";
+      captchaContainer.style.opacity = "0";
+      captchaContainer.style.transition = "opacity 3s ease-in-out";
+      
+      // 觸發重排並開始淡入動畫
+      void captchaContainer.offsetWidth;
+      captchaContainer.style.opacity = "1";
     }
   </script>
 </body>
